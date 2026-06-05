@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CareerGhana – Opening...</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #EFF6FF;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .card {
+      background: #fff;
+      border-radius: 20px;
+      padding: 40px 32px;
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    }
+    .logo {
+      width: 80px;
+      height: 80px;
+      border-radius: 20px;
+      background: #2F80ED;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      font-size: 36px;
+    }
+    h1 { font-size: 22px; color: #1E3A5F; margin-bottom: 8px; font-weight: 700; }
+    .org { font-size: 14px; color: #6B7280; margin-bottom: 4px; }
+    .type-badge {
+      display: inline-block;
+      background: #EFF6FF;
+      color: #2F80ED;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 24px;
+    }
+    .status {
+      font-size: 15px;
+      color: #374151;
+      margin-bottom: 28px;
+      line-height: 1.5;
+    }
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      text-decoration: none;
+      margin-bottom: 12px;
+      cursor: pointer;
+      border: none;
+    }
+    .btn-primary { background: #2F80ED; color: #fff; }
+    .btn-android { background: #01875F; color: #fff; }
+    .btn-ios { background: #000; color: #fff; }
+    .btn-secondary {
+      background: #F3F4F6;
+      color: #374151;
+      font-size: 13px;
+      padding: 10px;
+    }
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 16px 0;
+      color: #9CA3AF;
+      font-size: 12px;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #E5E7EB;
+    }
+    .footer { font-size: 12px; color: #9CA3AF; margin-top: 20px; }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid #E5E7EB;
+      border-top-color: #2F80ED;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #opening-view, #fallback-view { display: none; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">🎓</div>
+
+    <!-- Opening the app view -->
+    <div id="opening-view">
+      <div class="spinner"></div>
+      <h1>Opening CareerGhana...</h1>
+      <p class="status">If the app doesn't open automatically, tap the button below to download it.</p>
+      <div id="store-buttons"></div>
+    </div>
+
+    <!-- Fallback view (shown after 2s if app didn't open) -->
+    <div id="fallback-view">
+      <h1 id="item-title">CareerGhana</h1>
+      <p class="org" id="item-org"></p>
+      <span class="type-badge" id="item-type">Opportunity</span>
+      <p class="status">Download CareerGhana to view this opportunity and thousands more!</p>
+      <div id="store-buttons-fallback"></div>
+      <p class="footer">Ghana's #1 Career & Opportunity Platform</p>
+    </div>
+  </div>
+
+  <script>
+    // Parse URL params: smart-link.html?type=scholarship&id=abc&title=...&org=...
+    const params = new URLSearchParams(window.location.search);
+    const type = params.get('type') || 'scholarship';
+    const id = params.get('id') || '';
+    const title = params.get('title') || 'Opportunity on CareerGhana';
+    const org = params.get('org') || 'CareerGhana';
+
+    // Update UI
+    document.getElementById('item-title').textContent = title;
+    document.getElementById('item-org').textContent = org;
+    const typeLabels = { scholarship: '🎓 Scholarship', course: '📚 Online Course', program: '🏫 University Program' };
+    document.getElementById('item-type').textContent = typeLabels[type] || 'Opportunity';
+
+    // Logos
+    const logoEmojis = { scholarship: '🎓', course: '📚', program: '🏫' };
+    document.querySelector('.logo').textContent = logoEmojis[type] || '🎓';
+
+    // Store URLs
+    const PLAY_STORE = 'https://play.google.com/store/apps/details?id=com.dannygyan.cghana';
+    const APP_STORE = 'https://apps.apple.com/app/careerghana/id000000000'; // Update when on App Store
+
+    // Deep link into app
+    const deepLink = `cghana://opportunity?type=${type}&id=${id}`;
+
+    // Detect platform
+    const ua = navigator.userAgent || navigator.vendor || window.opera;
+    const isIOS = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
+    const isAndroid = /android/i.test(ua);
+
+    function makeStoreButtons(containerId) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = '';
+      if (isAndroid || (!isIOS && !isAndroid)) {
+        // Android or unknown (show Play Store)
+        const a = document.createElement('a');
+        a.href = PLAY_STORE;
+        a.className = 'btn btn-android';
+        a.textContent = '📥 Download on Google Play';
+        container.appendChild(a);
+      }
+      if (isIOS || (!isIOS && !isAndroid)) {
+        // iOS or unknown (show App Store)
+        const a = document.createElement('a');
+        a.href = APP_STORE;
+        a.className = 'btn btn-ios';
+        a.textContent = '📥 Download on App Store';
+        container.appendChild(a);
+      }
+    }
+
+    makeStoreButtons('store-buttons');
+    makeStoreButtons('store-buttons-fallback');
+
+    // Try to open the app
+    document.getElementById('opening-view').style.display = 'block';
+
+    // Attempt to open via deep link
+    window.location.href = deepLink;
+
+    // After 2.5 seconds, if still here, show fallback with store buttons
+    setTimeout(function() {
+      document.getElementById('opening-view').style.display = 'none';
+      document.getElementById('fallback-view').style.display = 'block';
+    }, 2500);
+  </script>
+</body>
+</html>
